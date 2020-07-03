@@ -1,0 +1,78 @@
+type: install
+id: omeka-s
+name: Omeka S
+homepage: https://omeka.org/s/
+baseUrl: https://raw.githubusercontent.com/reclaimhosting/omeka-s-jps/master
+logo: images/omeka-s-logo.png
+
+description: 
+  text: Omeka S is a next-generation web publishing platform for institutions interested in connecting digital cultural heritage collections with other resources online.
+  
+categories:
+- apps/popular
+- apps/content-management
+- apps/education
+
+globals:
+  DB_USER: omeka-${fn.random}
+  DB_PASS: ${fn.password(10)}
+  DB_HOST: 127.0.0.1
+  DB_NAME: omeka_${fn.random}
+  OMEKA_ADMIN_PASS: ${fn.password(10)}
+
+nodes:
+  nodeType: lemp
+  nodeGroup: cp
+  flexibleCloudlets: 16
+  extip: false
+  displayName: AppServer
+
+onInstall:
+  - deployArchive
+  - databaseSetup
+  - configSystem
+  - initInstall
+
+actions:
+  deployArchive:
+    deploy:
+      archive: https://cloud-jps-archives.s3.amazonaws.com/omeka-s-2.1.2.zip
+      name: omeka-s-2.1.2
+      context: ROOT
+      
+  databaseSetup:
+    - log: Create database and user
+    - cmd [cp]: |-
+        wget https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master/scripts/setupUser.sh -O ~/setupUser.sh &>> /var/log/run.log
+        bash ~/setupUser.sh ${globals.DB_USER} ${globals.DB_PASS} &>> /var/log/run.log
+        jem passwd set -p ${globals.DB_PASS} &>> /var/log/run.log
+        mysql -u${globals.DB_USER} -p${globals.DB_PASS} -h ${globals.DB_HOST} -e "CREATE DATABASE IF NOT EXISTS ${globals.DB_NAME};"
+      user: root
+
+  configSystem:
+    cmd[cp]: |-
+      sed -i 's|user     = ""|user     = "${globals.DB_USER}"|g' /var/www/webroot/ROOT/config/database.ini;
+      sed -i 's|password = ""|password = "${globals.DB_PASS}"|g' /var/www/webroot/ROOT/config/database.ini;
+      sed -i 's|dbname   = ""|dbname   = "${globals.DB_NAME}"|g' /var/www/webroot/ROOT/config/database.ini;
+      sed -i 's|host     = ""|host     = 127.0.0.1|g' /var/www/webroot/ROOT/config/database.ini;
+      sed -i "s|'phpcli_path' => null|'phpcli_path' => '/usr/bin/php'|g" /var/www/webroot/ROOT/config/local.config.php;
+      sed -i "s|'imagemagick_dir' => null|'imagemagick_dir' => '/usr/bin/convert'|g" /var/www/webroot/ROOT/config/local.config.php;
+     
+  initInstall:
+    cmd[cp]: |-
+      wget https://gist.githubusercontent.com/timmmmyboy/662f1ee48dd779b3e526b8df4e2db780/raw/fa3642e0930194412c6035c6b0873e852b880c33/install.php -O /var/www/webroot/ROOT/install.php
+      sed -i 's|#user_email|${user.email}|g' /var/www/webroot/ROOT/install.php;
+      sed -i 's|#user_pass|${globals.OMEKA_ADMIN_PASS}|g' /var/www/webroot/ROOT/install.php;
+      sed -i 's|#site_title|${env.displayName}|g' /var/www/webroot/ROOT/install.php;
+      sed -i 's|#env_url|https://${env.domain}|g' /var/www/webroot/ROOT/install.php;
+      php /var/www/webroot/ROOT/install.php;
+      rm /var/www/webroot/ROOT/install.php;
+      
+ssl: true
+skipNodeEmails: true
+
+success: | 
+  **Site URL**: [https://${env.domain}/](https://${env.domain}/)
+  **Admin URL**: [https://${env.domain}/admin](https://${env.domain}/admin)
+  **Username**: ${user.email}
+  **Password**: ${globals.OMEKA_ADMIN_PASS}
