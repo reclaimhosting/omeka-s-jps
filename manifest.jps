@@ -36,8 +36,8 @@ onInstall:
 actions:
   deployArchive:
     deploy:
-      archive: https://cloud-jps-archives.s3.amazonaws.com/omeka-s-2.1.2.zip
-      name: omeka-s-2.1.2
+      archive: https://cloud-jps-archives.s3.amazonaws.com/omeka-s-3.0.1.zip
+      name: omeka-s-3.0.1
       context: ROOT
       
   databaseSetup:
