@@ -26,7 +26,7 @@ nodes:
   flexibleCloudlets: 16
   extip: false
   displayName: AppServer
-  tag: 1.18.0-php-7.4.20
+  tag: 1.22.1-php-8.2.1
 
 onInstall:
   - deployArchive
@@ -37,8 +37,8 @@ onInstall:
 actions:
   deployArchive:
     deploy:
-      archive: https://cloud-jps-archives.s3.amazonaws.com/omeka-s-3.0.1.zip
-      name: omeka-s-3.0.1
+      archive: https://github.com/reclaimhosting/omeka-s-jps/raw/master/deploy/omeka-s-4.0.0.zip
+      name: omeka-s-4.0.0
       context: ROOT
       
   databaseSetup:
