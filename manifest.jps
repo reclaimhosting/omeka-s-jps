@@ -23,10 +23,7 @@ globals:
 nodes:
   nodeType: lemp
   nodeGroup: cp
-  flexibleCloudlets: 16
-  extip: false
-  displayName: AppServer
-  tag: 1.22.1-php-8.2.1
+  cloudlets: 16
 
 onInstall:
   - deployArchive
@@ -37,8 +34,8 @@ onInstall:
 actions:
   deployArchive:
     deploy:
-      archive: https://github.com/reclaimhosting/omeka-s-jps/raw/master/deploy/omeka-s-4.0.0.zip
-      name: omeka-s-4.0.0
+      archive: https://github.com/omeka/omeka-s/releases/download/v4.0.1/omeka-s-4.0.1.zip
+      name: omeka-s-4.0.1
       context: ROOT
       
   databaseSetup:
