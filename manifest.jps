@@ -33,10 +33,6 @@ onInstall:
 
 actions:
   deployArchive:
-    deploy:
-      archive: https://github.com/omeka/omeka-s/releases/download/v4.0.1/omeka-s-4.0.1.zip
-      name: omeka-s-4.0.1
-      context: ROOT
     cmd[cp]: |-
       function get_latest_release {
         curl --silent "https://api.github.com/repos/omeka/omeka-s/releases/latest" |
