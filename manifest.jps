@@ -49,7 +49,7 @@ actions:
       wget https://github.com/omeka/omeka-s/releases/download/v$LATEST/omeka-s-$LATEST.zip
       unzip omeka-s-$LATEST.zip
       mv omeka-s/* .
-      mv omeka-s/.* .
+      mv omeka-s/*.* .
       rm omeka-s-$LATEST.zip
       rm -r omeka-s/
       
