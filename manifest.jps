@@ -23,10 +23,7 @@ globals:
 nodes:
   nodeType: lemp
   nodeGroup: cp
-  flexibleCloudlets: 16
-  extip: false
-  displayName: AppServer
-  tag: 1.22.1-php-8.2.1
+  cloudlets: 16
 
 onInstall:
   - deployArchive
@@ -36,14 +33,25 @@ onInstall:
 
 actions:
   deployArchive:
-    deploy:
-      archive: https://github.com/reclaimhosting/omeka-s-jps/raw/master/deploy/omeka-s-4.0.0.zip
-      name: omeka-s-4.0.0
-      context: ROOT
+    cmd[cp]: |-
+      function get_latest_release {
+        curl --silent "https://api.github.com/repos/omeka/omeka-s/releases/latest" |
+        grep '"tag_name":' |
+        sed -E 's/.*"([^"]+)".*/\1/' |
+        sed 's/v//'
+      }
+      LATEST=`get_latest_release`
+      cd /var/www/webroot/ROOT
+      wget https://github.com/omeka/omeka-s/releases/download/v$LATEST/omeka-s-$LATEST.zip
+      unzip omeka-s-$LATEST.zip
+      mv omeka-s/* .
+      mv omeka-s/.htaccess .
+      rm omeka-s-$LATEST.zip
+      rm -r omeka-s/
       
   databaseSetup:
     - log: Create database and user
-    - cmd [cp]: |-
+    - cmd[cp]: |-
         wget https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master/scripts/setupUser.sh -O ~/setupUser.sh &>> /var/log/run.log
         bash ~/setupUser.sh ${globals.DB_USER} ${globals.DB_PASS} &>> /var/log/run.log
         jem passwd set -p ${globals.DB_PASS} &>> /var/log/run.log
